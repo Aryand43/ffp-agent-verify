@@ -1,0 +1,20 @@
+# Risk worker: consumes the event stream (Redis consumer group), so replicas share the load.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ffpv-risk-worker
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: ffpv-risk-worker}}
+  template:
+    metadata:
+      labels: {app: ffpv-risk-worker}
+    spec:
+      containers:
+        - name: worker
+          image: ffp-agent-verify:latest
+          command: ["python", "-m", "ffpverify.risk.worker"]
+          envFrom: [{secretRef: {name: ffpv-secrets}}]
+          resources:
+            requests: {cpu: 500m, memory: 256Mi}
+            limits: {memory: 512Mi}

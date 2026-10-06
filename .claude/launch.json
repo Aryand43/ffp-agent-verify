@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ffpv-api",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "uvicorn", "ffpverify.api.app:app", "--port", "8000"],
+      "port": 8000
+    }
+  ]
+}

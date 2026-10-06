@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ffp-agent-verify</title>
+<style>
+  :root { --bg:#f7f7f5; --card:#fff; --fg:#1d1d1f; --muted:#6b6b70; --line:#e4e4e0; --accent:#2f5bea;
+          --allow:#1f8a4c; --flag:#b8860b; --challenge:#7b4fd6; --throttle:#d9822b; --block:#c9372c; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#141416; --card:#1d1d20; --fg:#ececee; --muted:#9a9aa2; --line:#2e2e33; --accent:#7c9cff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui, -apple-system, sans-serif; }
+  header { padding:16px 24px; border-bottom:1px solid var(--line); display:flex; gap:20px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; }
+  nav button { background:none; border:none; color:var(--muted); font:inherit; padding:6px 10px; cursor:pointer; border-radius:6px; }
+  nav button.on { color:var(--fg); background:var(--card); box-shadow:0 0 0 1px var(--line); }
+  main { max-width:1100px; margin:0 auto; padding:20px 16px 60px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:16px; }
+  .card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:0 0 12px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  input, textarea, select { font:inherit; color:var(--fg); background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:7px 9px; }
+  input { min-width:200px; flex:1; }
+  textarea { width:100%; min-height:340px; font:12px/1.5 ui-monospace, Menlo, monospace; }
+  button.primary { background:var(--accent); color:#fff; border:none; border-radius:6px; padding:8px 14px; font:inherit; cursor:pointer; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+  .stat { border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+  .stat .v { font-size:22px; font-weight:600; }
+  .stat .k { color:var(--muted); font-size:12px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:500; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:99px; font-size:12px; color:#fff; }
+  .bar { display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--line); margin:6px 0 4px; }
+  .muted { color:var(--muted); }
+  .err { color:var(--block); }
+  .ok { color:var(--allow); }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:800px) { .two { grid-template-columns:1fr; } }
+  code { font:12px ui-monospace, Menlo, monospace; }
+  .hidden { display:none; }
+  .seats { display:inline-flex; gap:2px; vertical-align:middle; margin-right:6px; }
+  .seats i { width:8px; height:12px; border-radius:2px; background:var(--line); display:inline-block; }
+  .seats i.open { background:var(--allow); }
+  .tag { display:inline-block; font-size:11px; padding:0 6px; border-radius:4px; border:1px solid var(--line); color:var(--muted); }
+  label.chk { display:inline-flex; gap:6px; align-items:center; color:var(--muted); }
+  label.chk input { min-width:0; flex:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ffp-agent-verify</h1>
+  <nav>
+    <button data-tab="airline" class="on">Airline console</button>
+    <button data-tab="inventory">Redemption inventory</button>
+    <button data-tab="tool">Tool dashboard</button>
+  </nav>
+  <span class="muted" style="margin-left:auto"><a href="/docs" style="color:inherit">API docs</a></span>
+</header>
+
+<main>
+<!-- ======================= airline ======================= -->
+<section id="airline">
+  <div class="card">
+    <h2>Sign in as an airline</h2>
+    <div class="row">
+      <input id="a-id" placeholder="Airline ID (e.g. AC)" style="max-width:160px">
+      <input id="a-key" type="password" placeholder="Airline API key (ffpv_ak_…)">
+      <input id="a-hours" type="number" value="24" style="max-width:90px" title="window (hours)">
+      <button class="primary" id="a-load">Load</button>
+    </div>
+    <div id="a-msg" class="muted" style="margin-top:8px"></div>
+  </div>
+
+  <div id="a-body" class="hidden">
+    <div class="card">
+      <h2>Traffic</h2>
+      <div class="grid" id="a-stats"></div>
+      <div id="a-lanes" style="margin-top:14px"></div>
+    </div>
+    <div class="two">
+      <div class="card"><h2>Tools at this airline</h2><div id="a-tools"></div></div>
+      <div class="card"><h2>Top reasons</h2><div id="a-reasons"></div></div>
+    </div>
+    <div class="card"><h2>Recent risk events</h2><div id="a-events"></div></div>
+    <div class="card">
+      <h2>Policy <span id="a-pver" class="muted"></span></h2>
+      <p class="muted" style="margin-top:0">Edits apply to every verifier replica within about a second. Every version is kept.</p>
+      <textarea id="a-policy" spellcheck="false"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="primary" id="a-save">Save policy</button>
+        <span id="a-pmsg"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= inventory ======================= -->
+<section id="inventory" class="hidden">
+  <div class="card">
+    <h2>Redemption inventory</h2>
+    <p class="muted" style="margin-top:0">Award seats open vs. the redemption cap per flight, date and award class
+      (X economy, I business, O first/suites), including partner space. Uses the airline sign-in from the airline console.</p>
+    <div class="row">
+      <input id="i-origin" placeholder="From (SIN)" maxlength="3" style="max-width:110px">
+      <input id="i-dest" placeholder="To (LHR)" maxlength="3" style="max-width:110px">
+      <input id="i-from" type="date" style="max-width:160px" title="from date">
+      <input id="i-to" type="date" style="max-width:160px" title="to date">
+      <select id="i-class"><option value="">All classes</option><option value="X">X · economy</option>
+        <option value="I">I · business</option><option value="O">O · first / suites</option></select>
+      <label class="chk"><input type="checkbox" id="i-open"> Open seats only</label>
+      <label class="chk"><input type="checkbox" id="i-partner"> Partner space only</label>
+      <button class="primary" id="i-load">Load</button>
+    </div>
+    <div id="i-msg" class="muted" style="margin-top:8px"></div>
+  </div>
+  <div id="i-body" class="hidden">
+    <div class="card"><h2>By award class <span id="i-alliance" class="muted"></span></h2><div class="grid" id="i-summary"></div></div>
+    <div class="card"><h2>Flights <span id="i-count" class="muted"></span></h2><div id="i-table"></div></div>
+  </div>
+</section>
+
+<!-- ======================= tool ======================= -->
+<section id="tool" class="hidden">
+  <div class="card">
+    <h2>Sign in as a tool developer</h2>
+    <div class="row">
+      <input id="t-id" placeholder="Tool ID (tool_…)">
+      <input id="t-key" type="password" placeholder="Management token (ffpv_tt_…)">
+      <input id="t-hours" type="number" value="24" style="max-width:90px" title="window (hours)">
+      <button class="primary" id="t-load">Load</button>
+    </div>
+    <div id="t-msg" class="muted" style="margin-top:8px"></div>
+  </div>
+
+  <div id="t-body" class="hidden">
+    <div class="card"><h2>Risk profile</h2><div class="grid" id="t-stats"></div></div>
+    <div class="two">
+      <div class="card"><h2>Decisions by airline</h2><div id="t-decisions"></div></div>
+      <div class="card"><h2>Top reasons</h2><div id="t-reasons"></div></div>
+    </div>
+    <div class="card"><h2>Riskiest grants — what to fix</h2><div id="t-grants"></div></div>
+    <div class="card"><h2>Airline quotas you must respect</h2><div id="t-quotas"></div></div>
+  </div>
+</section>
+</main>
+
+<script>
+const DECISIONS = ["allow", "flag", "challenge", "throttle", "block"];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n).toLocaleString();
+const color = d => `var(--${d})`;
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch { return ""; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  ["airline", "inventory", "tool"].forEach(t => $(t).classList.toggle("hidden", t !== b.dataset.tab));
+});
+
+async function api(path, headers, opts = {}) {
+  const r = await fetch(path, {...opts, headers: {"content-type": "application/json", ...headers}});
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail || body));
+  return body;
+}
+
+function table(cols, rows) {
+  if (!rows.length) return '<p class="muted">Nothing in this window.</p>';
+  return `<table><tr>${cols.map(c => `<th class="${c.num ? "num" : ""}">${c.h}</th>`).join("")}</tr>` +
+    rows.map(r => `<tr>${cols.map(c => `<td class="${c.num ? "num" : ""}">${c.f(r)}</td>`).join("")}</tr>`).join("") +
+    "</table>";
+}
+
+function mixBar(counts) {
+  const total = DECISIONS.reduce((s, d) => s + (counts[d] || 0), 0) || 1;
+  const bar = DECISIONS.map(d => counts[d] ? `<div title="${d}: ${fmt(counts[d])}" style="width:${counts[d] / total * 100}%;background:${color(d)}"></div>` : "").join("");
+  const legend = DECISIONS.filter(d => counts[d]).map(d =>
+    `<span style="margin-right:12px"><span class="pill" style="background:${color(d)}">${d}</span> ${fmt(counts[d])} (${(counts[d] / total * 100).toFixed(1)}%)</span>`).join("");
+  return `<div class="bar">${bar}</div><div style="font-size:12px">${legend}</div>`;
+}
+
+const stat = (k, v) => `<div class="stat"><div class="v">${v}</div><div class="k">${k}</div></div>`;
+const pill = d => `<span class="pill" style="background:${color(d === "revoke" ? "block" : d)}">${esc(d)}</span>`;
+
+// ---------------- airline ----------------
+$("a-id").value = store.get("a-id"); $("a-key").value = store.get("a-key");
+
+async function loadAirline() {
+  const id = $("a-id").value.trim().toUpperCase(), key = $("a-key").value.trim(), hours = $("a-hours").value || 24;
+  store.set("a-id", id); store.set("a-key", key);
+  const h = {"X-Api-Key": key};
+  $("a-msg").textContent = "Loading…"; $("a-msg").className = "muted";
+  try {
+    const [s, p] = await Promise.all([api(`/v1/airlines/${id}/stats?hours=${hours}`, h), api(`/v1/airlines/${id}/policy`, h)]);
+    $("a-msg").textContent = "";
+    $("a-body").classList.remove("hidden");
+    const byLane = {}; let total = 0;
+    s.decisions.forEach(r => { (byLane[r.lane] ||= {})[r.decision] = r.n; total += r.n; });
+    const all = {}; s.decisions.forEach(r => all[r.decision] = (all[r.decision] || 0) + r.n);
+    $("a-stats").innerHTML = stat("searches verified", fmt(total)) +
+      stat("blocked", fmt(all.block || 0)) + stat("throttled", fmt(all.throttle || 0)) +
+      stat("verify p50", s.latency_us?.p50 != null ? (s.latency_us.p50 / 1000).toFixed(2) + " ms" : "–") +
+      stat("verify p99", s.latency_us?.p99 != null ? (s.latency_us.p99 / 1000).toFixed(2) + " ms" : "–");
+    $("a-lanes").innerHTML = Object.entries(byLane).map(([lane, c]) =>
+      `<div style="margin-bottom:10px"><b>${esc(lane)}</b>${mixBar(c)}</div>`).join("") || '<p class="muted">No traffic yet.</p>';
+    $("a-tools").innerHTML = table([
+      {h: "Tool", f: r => `${esc(r.name)}<br><code class="muted">${esc(r.tool_id)}</code>`},
+      {h: "Status", f: r => r.status === "active" ? '<span class="ok">active</span>' : `<span class="err">${esc(r.status)}</span>`},
+      {h: "Grants", num: 1, f: r => fmt(r.grants) + (r.revoked ? ` <span class="err">(${r.revoked} revoked)</span>` : "")},
+      {h: "Max risk", num: 1, f: r => Number(r.risk).toFixed(0)},
+    ], s.tools);
+    $("a-reasons").innerHTML = table([{h: "Reason", f: r => `<code>${esc(r.r)}</code>`}, {h: "Count", num: 1, f: r => fmt(r.n)}], s.top_reasons);
+    $("a-events").innerHTML = table([
+      {h: "Time", f: r => new Date(r.ts).toLocaleTimeString()},
+      {h: "Action", f: r => pill(r.action_taken)},
+      {h: "Subject", f: r => `${esc(r.subject_type)} <code class="muted">${esc(String(r.subject_id).slice(0, 18))}</code>`},
+      {h: "Score", num: 1, f: r => Number(r.risk_score).toFixed(0)},
+      {h: "Why", f: r => esc(r.flags?.detail || (r.flags?.reason_codes || []).join(", ") || r.flags?.failure || "")},
+    ], s.recent_events);
+    $("a-pver").textContent = `v${p.version}`;
+    $("a-policy").value = JSON.stringify(p.policy, null, 2);
+  } catch (e) {
+    $("a-msg").textContent = e.message; $("a-msg").className = "err"; $("a-body").classList.add("hidden");
+  }
+}
+
+$("a-load").onclick = loadAirline;
+$("a-save").onclick = async () => {
+  const id = $("a-id").value.trim().toUpperCase();
+  try {
+    const policy = JSON.parse($("a-policy").value);
+    const r = await api(`/v1/airlines/${id}/policy`, {"X-Api-Key": $("a-key").value.trim()},
+                        {method: "PUT", body: JSON.stringify(policy)});
+    $("a-pver").textContent = `v${r.version}`;
+    $("a-pmsg").textContent = `Saved as version ${r.version}.`; $("a-pmsg").className = "ok";
+  } catch (e) { $("a-pmsg").textContent = e.message; $("a-pmsg").className = "err"; }
+};
+
+// ---------------- inventory ----------------
+const CABIN = {X: "economy", I: "business", O: "first / suites"};
+const seatsViz = (a, t) => t == null ? "" :
+  `<span class="seats">${Array.from({length: t}, (_, i) => `<i class="${i < a ? "open" : ""}"></i>`).join("")}</span>`;
+
+$("i-load").onclick = async () => {
+  const id = ($("a-id").value || store.get("a-id")).trim().toUpperCase();
+  const key = ($("a-key").value || store.get("a-key")).trim();
+  if (!id || !key) { $("i-msg").textContent = "Sign in on the Airline console tab first."; $("i-msg").className = "err"; return; }
+  const q = new URLSearchParams({limit: 1000});
+  const set = (k, v) => v && q.set(k, v);
+  set("origin", $("i-origin").value.trim()); set("destination", $("i-dest").value.trim());
+  set("date_from", $("i-from").value); set("date_to", $("i-to").value); set("award_class", $("i-class").value);
+  if ($("i-open").checked) q.set("available_only", "true");
+  if ($("i-partner").checked) q.set("partner_only", "true");
+  $("i-msg").textContent = "Loading…"; $("i-msg").className = "muted";
+  try {
+    const inv = await api(`/v1/airlines/${id}/inventory?${q}`, {"X-Api-Key": key});
+    $("i-msg").textContent = ""; $("i-body").classList.remove("hidden");
+    $("i-alliance").textContent = `· ${id}${inv.alliance ? " · " + inv.alliance.replace("_", " ") : ""}`;
+    $("i-summary").innerHTML = inv.summary.map(s => {
+      const taken = s.seats_total ? Math.round((1 - s.seats_available / s.seats_total) * 100) : null;
+      return stat(`${esc(s.award_class)} · ${esc(CABIN[s.award_class] || s.cabin)}<br>${fmt(s.flights_open)} of ${fmt(s.flights)} flights open` +
+                  (s.partner_flights ? `, ${fmt(s.partner_flights)} partner` : "") + (taken != null ? ` · ${taken}% taken` : ""),
+                  `${fmt(s.seats_available)} <span class="muted" style="font-size:14px">/ ${s.seats_total != null ? fmt(s.seats_total) : "?"} seats</span>`);
+    }).join("") || '<p class="muted">No inventory matches.</p>';
+    $("i-count").textContent = `· showing ${fmt(inv.rows.length)} of ${fmt(inv.total_rows)}`;
+    $("i-table").innerHTML = table([
+      {h: "Date", f: r => esc(r.travel_date)},
+      {h: "Flight", f: r => `${esc(r.flight_number)}${r.partner ? ` <span class="tag" title="partner space">partner · ${esc(r.operating_carrier)}</span>` : ""}`},
+      {h: "Route", f: r => `${esc(r.origin)} → ${esc(r.destination)}`},
+      {h: "Departs", f: r => esc(r.departs_at || "")},
+      {h: "Cabin", f: r => esc(r.cabin.replace("_", " "))},
+      {h: "Class", f: r => `<code>${esc(r.award_class)}</code>`},
+      {h: "Seats open / total", f: r => `${seatsViz(r.seats_available, r.seats_total)}${r.seats_available} / ${r.seats_total ?? "?"}`},
+      {h: "Source", f: r => `<span class="muted">${esc(r.source)} · ${new Date(r.observed_at).toLocaleTimeString()}</span>`},
+    ], inv.rows);
+  } catch (e) {
+    $("i-msg").textContent = e.message; $("i-msg").className = "err"; $("i-body").classList.add("hidden");
+  }
+};
+
+// ---------------- tool ----------------
+$("t-id").value = store.get("t-id"); $("t-key").value = store.get("t-key");
+
+$("t-load").onclick = async () => {
+  const id = $("t-id").value.trim(), key = $("t-key").value.trim(), hours = $("t-hours").value || 24;
+  store.set("t-id", id); store.set("t-key", key);
+  $("t-msg").textContent = "Loading…"; $("t-msg").className = "muted";
+  try {
+    const a = await api(`/v1/tools/${id}/analytics?hours=${hours}`, {"X-Tool-Token": key});
+    $("t-msg").textContent = ""; $("t-body").classList.remove("hidden");
+    const total = a.decisions.reduce((s, r) => s + r.n, 0);
+    const blocked = a.decisions.filter(r => r.decision === "block").reduce((s, r) => s + r.n, 0);
+    $("t-stats").innerHTML = stat("name", esc(a.tool.name)) +
+      stat("status", a.tool.status === "active" ? '<span class="ok">active</span>' : `<span class="err">${esc(a.tool.status)}</span>`) +
+      stat("risk score (max grant)", Number(a.tool.risk_score).toFixed(0)) +
+      stat("searches", fmt(total)) + stat("blocked", fmt(blocked)) +
+      stat("grants", Object.entries(a.grants).map(([k, v]) => `${v} ${k}`).join(", ") || "0");
+    const per = {}; a.decisions.forEach(r => (per[r.airline_id] ||= {})[r.decision] = r.n);
+    $("t-decisions").innerHTML = Object.entries(per).map(([air, c]) => `<div style="margin-bottom:10px"><b>${esc(air)}</b>${mixBar(c)}</div>`).join("") || '<p class="muted">No traffic yet.</p>';
+    $("t-reasons").innerHTML = table([{h: "Reason", f: r => `<code>${esc(r.r)}</code>`}, {h: "Count", num: 1, f: r => fmt(r.n)}], a.top_reasons);
+    const live = Object.fromEntries(a.live_reasons.map(l => [l.grant_id, l.reasons]));
+    $("t-grants").innerHTML = table([
+      {h: "Grant", f: r => `<code>${esc(r.grant_id.slice(0, 12))}…</code> @ ${esc(r.airline_id)}`},
+      {h: "Status", f: r => r.status === "active" ? '<span class="ok">active</span>' : `<span class="err">revoked</span><br><span class="muted">${esc(r.status_reason)}</span>`},
+      {h: "Score", num: 1, f: r => Number(r.risk_score).toFixed(0)},
+      {h: "Signals → advice", f: r => (live[r.grant_id] || []).map(x =>
+        `<div><code>${esc(x.signal)}</code> +${x.points} — ${esc(x.detail)}<br><span class="muted">${esc(x.advice)}</span></div>`).join("") || '<span class="muted">clean</span>'},
+    ], a.riskiest_grants);
+    $("t-quotas").innerHTML = table([
+      {h: "Airline", f: r => esc(r[0])},
+      {h: "Agents allowed", f: r => r[1].authorized_agents_allowed ? "yes" : '<span class="err">no</span>'},
+      {h: "/min per credential", num: 1, f: r => r[1].max_searches_per_min_per_credential},
+      {h: "/min per tool", num: 1, f: r => r[1].max_searches_per_min_per_tool},
+      {h: "Min IP rotation", num: 1, f: r => r[1].min_ip_rotation_interval_s + " s"},
+      {h: "VPN", f: r => esc(r[1].vpn_tolerance)},
+    ], Object.entries(a.airline_quotas));
+  } catch (e) {
+    $("t-msg").textContent = e.message; $("t-msg").className = "err"; $("t-body").classList.add("hidden");
+  }
+};
+</script>
+</body>
+</html>

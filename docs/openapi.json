@@ -1,0 +1,2309 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ffp-agent-verify",
+    "description": "Verify and risk-score automated frequent-flyer award searches. See docs/ for integration guides.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/v1/search/verify": {
+      "post": {
+        "tags": [
+          "verification"
+        ],
+        "summary": "Verify",
+        "description": "Verify one incoming award search. Returns allow / flag / challenge / throttle / block.\n\nAct on `decision`; show `reasons` to the tool (they're written for tool developers).",
+        "operationId": "verify_v1_search_verify_post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/airlines": {
+      "post": {
+        "tags": [
+          "airlines"
+        ],
+        "summary": "Create Airline",
+        "operationId": "create_airline_v1_airlines_post",
+        "parameters": [
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AirlineCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AirlineCreated"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/airlines/{airline_id}/jwks": {
+      "put": {
+        "tags": [
+          "airlines"
+        ],
+        "summary": "Rotate Airline Keys",
+        "description": "Replace the airline authorization server's signing keys (JWKS).",
+        "operationId": "rotate_airline_keys_v1_airlines__airline_id__jwks_put",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/airlines/{airline_id}/policy": {
+      "get": {
+        "tags": [
+          "airlines"
+        ],
+        "summary": "Get Policy",
+        "operationId": "get_policy_v1_airlines__airline_id__policy_get",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "airlines"
+        ],
+        "summary": "Put Policy",
+        "description": "Replace the airline's policy. Takes effect on every replica within ~1s, no redeploy.",
+        "operationId": "put_policy_v1_airlines__airline_id__policy_put",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AirlinePolicy"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "airlines"
+        ],
+        "summary": "Patch Policy",
+        "description": "Merge a partial policy (e.g. `{\"max_searches_per_min_per_credential\": 20}`) into the current one.",
+        "operationId": "patch_policy_v1_airlines__airline_id__policy_patch",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/airlines/{airline_id}/stats": {
+      "get": {
+        "tags": [
+          "airlines"
+        ],
+        "summary": "Airline Stats",
+        "description": "Decision mix, top reasons, latency, riskiest tools and recent risk events for this airline.",
+        "operationId": "airline_stats_v1_airlines__airline_id__stats_get",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 24,
+              "title": "Hours"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/airlines/{airline_id}/grants/{grant_id}/revoke": {
+      "post": {
+        "tags": [
+          "airlines"
+        ],
+        "summary": "Revoke Grant",
+        "description": "Revoke one member's authorization of a tool at this airline (credential revocation).",
+        "operationId": "revoke_grant_v1_airlines__airline_id__grants__grant_id__revoke_post",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "grant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Grant Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools/register": {
+      "post": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Register Tool",
+        "description": "Register a tool's Ed25519 public key. `proof` shows the caller holds the private key.",
+        "operationId": "register_tool_v1_tools_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolRegister"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolRegistered"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools/{tool_id}/jwks": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Tool Jwks",
+        "description": "Public: the tool's current key(s). Airline authorization servers use this for private_key_jwt\nclient authentication and to check the `dpop_jkt` they bind tokens to.",
+        "operationId": "tool_jwks_v1_tools__tool_id__jwks_get",
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools/{tool_id}/revoke": {
+      "post": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Revoke Tool",
+        "description": "Revoke a tool's key everywhere (key compromise, or confirmed abuse).",
+        "operationId": "revoke_tool_v1_tools__tool_id__revoke_post",
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Id"
+            }
+          },
+          {
+            "name": "x-tool-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tool-Token"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools/{tool_id}/analytics": {
+      "get": {
+        "tags": [
+          "tools"
+        ],
+        "summary": "Tool Analytics",
+        "description": "The tool's risk profile: decisions, reasons, riskiest grants and the quotas it must respect.",
+        "operationId": "tool_analytics_v1_tools__tool_id__analytics_get",
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Id"
+            }
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 24,
+              "title": "Hours"
+            }
+          },
+          {
+            "name": "x-tool-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tool-Token"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/airlines/{airline_id}/inventory": {
+      "put": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Push Inventory",
+        "description": "The airline's own redemption inventory feed: seats open vs. the cap, per flight, date and award class.\n\nUpserts by (operating carrier, flight, date, award class). Include partner / alliance space with\n`operating_carrier`. Older snapshots never overwrite newer ones.",
+        "operationId": "push_inventory_v1_airlines__airline_id__inventory_put",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryIngested"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Get Inventory",
+        "description": "The redemption catalog for this program: departure, destination, date, cabin, award class and\nseats available vs. total, including partner space. `summary` totals seats per cabin and class.",
+        "operationId": "get_inventory_v1_airlines__airline_id__inventory_get",
+        "parameters": [
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "origin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Origin"
+            }
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Destination"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "cabin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cabin"
+            }
+          },
+          {
+            "name": "award_class",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Award Class"
+            }
+          },
+          {
+            "name": "operating_carrier",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Operating Carrier"
+            }
+          },
+          {
+            "name": "partner_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Partner Only"
+            }
+          },
+          {
+            "name": "available_only",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Available Only"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 500,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/tools/{tool_id}/inventory/{airline_id}": {
+      "post": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Report Inventory",
+        "description": "An authorized tool reports the award availability its searches returned at `airline_id`.\n\nOnly tools with an active member authorization at that airline (one that has made a verified search\nthere) may report. `seats_total` is optional; the last\nknown cap is kept when it's missing.",
+        "operationId": "report_inventory_v1_tools__tool_id__inventory__airline_id__post",
+        "parameters": [
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Id"
+            }
+          },
+          {
+            "name": "airline_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Airline Id"
+            }
+          },
+          {
+            "name": "x-tool-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Tool-Token"
+            }
+          },
+          {
+            "name": "x-admin-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryUpload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryIngested"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/feedback": {
+      "post": {
+        "tags": [
+          "feedback"
+        ],
+        "summary": "Feedback",
+        "description": "Label a decision (false positive / negative, confirmed abuse / legitimate) for tuning.",
+        "operationId": "feedback_v1_feedback_post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AirlineCreate": {
+        "properties": {
+          "airline_id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{2,3}$",
+            "title": "Airline Id",
+            "examples": [
+              "AC"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Issuer"
+          },
+          "jwks": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jwks"
+          },
+          "jwks_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Jwks Uri"
+          }
+        },
+        "type": "object",
+        "required": [
+          "airline_id",
+          "name",
+          "issuer"
+        ],
+        "title": "AirlineCreate"
+      },
+      "AirlineCreated": {
+        "properties": {
+          "airline_id": {
+            "type": "string",
+            "title": "Airline Id"
+          },
+          "api_key": {
+            "type": "string",
+            "title": "Api Key",
+            "description": "Shown once. Send as X-Api-Key on /v1/search/verify."
+          }
+        },
+        "type": "object",
+        "required": [
+          "airline_id",
+          "api_key"
+        ],
+        "title": "AirlineCreated"
+      },
+      "AirlinePolicy": {
+        "properties": {
+          "authorized_agents_allowed": {
+            "type": "boolean",
+            "title": "Authorized Agents Allowed",
+            "default": true
+          },
+          "unauthenticated_mode": {
+            "$ref": "#/components/schemas/UnauthenticatedMode",
+            "default": "score"
+          },
+          "max_searches_per_min_per_credential": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Searches Per Min Per Credential",
+            "default": 30
+          },
+          "max_searches_per_min_per_tool": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Searches Per Min Per Tool",
+            "default": 600
+          },
+          "max_searches_per_min_per_ip_unauthenticated": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Searches Per Min Per Ip Unauthenticated",
+            "default": 20
+          },
+          "max_devices_per_ip": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Devices Per Ip",
+            "default": 10
+          },
+          "burst_multiplier": {
+            "type": "number",
+            "minimum": 1.0,
+            "title": "Burst Multiplier",
+            "default": 1.5
+          },
+          "min_ip_rotation_interval_s": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Min Ip Rotation Interval S",
+            "default": 60
+          },
+          "max_concurrent_ips_per_credential": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Concurrent Ips Per Credential",
+            "default": 2
+          },
+          "min_grant_age_s": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Min Grant Age S",
+            "default": 3600
+          },
+          "new_grant_rate_factor": {
+            "type": "number",
+            "maximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "New Grant Rate Factor",
+            "default": 0.5
+          },
+          "max_tools_per_member": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Tools Per Member",
+            "default": 3
+          },
+          "vpn_tolerance": {
+            "$ref": "#/components/schemas/VpnTolerance",
+            "default": "authenticated_only"
+          },
+          "weights_authenticated": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights Authenticated"
+          },
+          "weights_unauthenticated": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Weights Unauthenticated"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/Thresholds"
+          },
+          "fail_mode": {
+            "$ref": "#/components/schemas/FailMode",
+            "default": "open"
+          }
+        },
+        "type": "object",
+        "title": "AirlinePolicy"
+      },
+      "ClientSignals": {
+        "properties": {
+          "device_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Id",
+            "description": "Airline's first-party device / session identifier"
+          },
+          "webdriver": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Webdriver",
+            "description": "navigator.webdriver from the airline's client script"
+          },
+          "bot_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bot Score",
+            "description": "Edge bot-management score, 0 = human, 1 = bot"
+          },
+          "captcha": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "failed",
+                  "not_presented"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captcha"
+          }
+        },
+        "type": "object",
+        "title": "ClientSignals"
+      },
+      "Decision": {
+        "type": "string",
+        "enum": [
+          "allow",
+          "flag",
+          "challenge",
+          "throttle",
+          "block"
+        ],
+        "title": "Decision"
+      },
+      "FailMode": {
+        "type": "string",
+        "enum": [
+          "open",
+          "closed"
+        ],
+        "title": "FailMode"
+      },
+      "FeedbackCreate": {
+        "properties": {
+          "label": {
+            "$ref": "#/components/schemas/FeedbackLabel"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "tool_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label"
+        ],
+        "title": "FeedbackCreate"
+      },
+      "FeedbackLabel": {
+        "type": "string",
+        "enum": [
+          "false_positive",
+          "false_negative",
+          "confirmed_abuse",
+          "confirmed_legitimate"
+        ],
+        "title": "FeedbackLabel"
+      },
+      "ForwardedRequest": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "title": "Method",
+            "examples": [
+              "GET"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "Full URL exactly as the tool requested it (scheme, host, path, query)",
+            "examples": [
+              "https://api.airline.example/award/search?from=YVR&to=NRT&date=2026-12-01"
+            ]
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Headers",
+            "description": "All request headers; must include Authorization, Signature-Input and Signature for signed requests"
+          },
+          "body_b64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Body B64",
+            "description": "Request body, base64, if the signature covers content-digest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method",
+          "url",
+          "headers"
+        ],
+        "title": "ForwardedRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InventoryIngested": {
+        "properties": {
+          "received": {
+            "type": "integer",
+            "title": "Received"
+          },
+          "new": {
+            "type": "integer",
+            "title": "New",
+            "description": "Rows not seen before"
+          },
+          "changed": {
+            "type": "integer",
+            "title": "Changed",
+            "description": "Seat counts changed"
+          },
+          "unchanged": {
+            "type": "integer",
+            "title": "Unchanged"
+          },
+          "stale": {
+            "type": "integer",
+            "title": "Stale",
+            "description": "Ignored because a newer observation already exists"
+          }
+        },
+        "type": "object",
+        "required": [
+          "received",
+          "new",
+          "changed",
+          "unchanged",
+          "stale"
+        ],
+        "title": "InventoryIngested"
+      },
+      "InventoryRow": {
+        "properties": {
+          "operating_carrier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z0-9]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operating Carrier",
+            "description": "Defaults to the program's own airline (own metal)"
+          },
+          "flight_number": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{2}\\d{1,4}[A-Z]?$",
+            "title": "Flight Number",
+            "examples": [
+              "SQ322"
+            ]
+          },
+          "origin": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Origin",
+            "examples": [
+              "SIN"
+            ]
+          },
+          "destination": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Destination",
+            "examples": [
+              "LHR"
+            ]
+          },
+          "travel_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Travel Date"
+          },
+          "departs_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Departs At",
+            "examples": [
+              "23:35"
+            ]
+          },
+          "cabin": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(economy|premium_economy|business|first)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cabin",
+            "description": "Inferred from award_class (X/I/O) when omitted"
+          },
+          "award_class": {
+            "type": "string",
+            "pattern": "^[A-Z]$",
+            "title": "Award Class",
+            "examples": [
+              "I"
+            ]
+          },
+          "seats_available": {
+            "type": "integer",
+            "maximum": 99.0,
+            "minimum": 0.0,
+            "title": "Seats Available"
+          },
+          "seats_total": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 99.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seats Total",
+            "description": "Redemption cap for this class on this flight"
+          }
+        },
+        "type": "object",
+        "required": [
+          "flight_number",
+          "origin",
+          "destination",
+          "travel_date",
+          "award_class",
+          "seats_available"
+        ],
+        "title": "InventoryRow"
+      },
+      "InventoryUpload": {
+        "properties": {
+          "observed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed At",
+            "description": "When this snapshot was taken; defaults to now"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryRow"
+            },
+            "type": "array",
+            "maxItems": 5000,
+            "minItems": 1,
+            "title": "Rows"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rows"
+        ],
+        "title": "InventoryUpload"
+      },
+      "Lane": {
+        "type": "string",
+        "enum": [
+          "authenticated",
+          "unauthenticated"
+        ],
+        "title": "Lane"
+      },
+      "Reason": {
+        "properties": {
+          "signal": {
+            "type": "string",
+            "title": "Signal"
+          },
+          "strength": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strength"
+          },
+          "points": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Points"
+          },
+          "pillar": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "safety",
+                  "trust",
+                  "verifiability"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pillar",
+            "description": "Which layer this signal belongs to (docs/framework.md)"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "advice": {
+            "type": "string",
+            "title": "Advice",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "signal",
+          "detail"
+        ],
+        "title": "Reason"
+      },
+      "RevokeRequest": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "RevokeRequest"
+      },
+      "SearchInfo": {
+        "properties": {
+          "origin": {
+            "type": "string",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "Origin",
+            "examples": [
+              "YVR"
+            ]
+          },
+          "destination": {
+            "type": "string",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "Destination",
+            "examples": [
+              "NRT"
+            ]
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date",
+            "examples": [
+              "2026-12-01"
+            ]
+          },
+          "cabin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cabin",
+            "examples": [
+              "business"
+            ]
+          },
+          "passengers": {
+            "type": "integer",
+            "title": "Passengers",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "origin",
+          "destination"
+        ],
+        "title": "SearchInfo"
+      },
+      "Thresholds": {
+        "properties": {
+          "challenge": {
+            "type": "number",
+            "title": "Challenge",
+            "default": 40
+          },
+          "throttle": {
+            "type": "number",
+            "title": "Throttle",
+            "default": 60
+          },
+          "block": {
+            "type": "number",
+            "title": "Block",
+            "default": 80
+          },
+          "revoke": {
+            "type": "number",
+            "title": "Revoke",
+            "default": 95
+          }
+        },
+        "type": "object",
+        "title": "Thresholds"
+      },
+      "ToolRegister": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "developer_contact": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 3,
+            "title": "Developer Contact"
+          },
+          "public_jwk": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Public Jwk",
+            "description": "Ed25519 public key as an OKP JWK"
+          },
+          "redirect_uris": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Redirect Uris"
+          },
+          "proof": {
+            "type": "string",
+            "title": "Proof",
+            "description": "base64 Ed25519 signature over 'ffpv-register:<jkt>:<proof_ts>'"
+          },
+          "proof_ts": {
+            "type": "integer",
+            "title": "Proof Ts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "developer_contact",
+          "public_jwk",
+          "proof",
+          "proof_ts"
+        ],
+        "title": "ToolRegister"
+      },
+      "ToolRegistered": {
+        "properties": {
+          "tool_id": {
+            "type": "string",
+            "title": "Tool Id"
+          },
+          "jkt": {
+            "type": "string",
+            "title": "Jkt"
+          },
+          "management_token": {
+            "type": "string",
+            "title": "Management Token",
+            "description": "Shown once. Send as X-Tool-Token for analytics and revocation."
+          }
+        },
+        "type": "object",
+        "required": [
+          "tool_id",
+          "jkt",
+          "management_token"
+        ],
+        "title": "ToolRegistered"
+      },
+      "UnauthenticatedMode": {
+        "type": "string",
+        "enum": [
+          "score",
+          "challenge"
+        ],
+        "title": "UnauthenticatedMode"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerifyRequest": {
+        "properties": {
+          "request": {
+            "$ref": "#/components/schemas/ForwardedRequest"
+          },
+          "client_ip": {
+            "type": "string",
+            "title": "Client Ip"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SearchInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "client_signals": {
+            "$ref": "#/components/schemas/ClientSignals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request",
+          "client_ip"
+        ],
+        "title": "VerifyRequest"
+      },
+      "VerifyResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/Decision"
+          },
+          "lane": {
+            "$ref": "#/components/schemas/Lane"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score",
+            "description": "0-100; compared against the airline's thresholds"
+          },
+          "pillars": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pillars",
+            "description": "The score split across safety / trust / verifiability (sums to score); a failed hard check puts 100 on its own layer. Null when degraded.",
+            "examples": [
+              {
+                "safety": 0.0,
+                "trust": 12.5,
+                "verifiability": 41.3
+              }
+            ]
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "type": "array",
+            "title": "Reasons"
+          },
+          "tool_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Id"
+          },
+          "retry_after_s": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retry After S"
+          },
+          "policy_version": {
+            "type": "integer",
+            "title": "Policy Version"
+          },
+          "degraded": {
+            "type": "boolean",
+            "title": "Degraded",
+            "description": "True if Redis was unavailable and the airline's fail mode applied",
+            "default": false
+          },
+          "latency_us": {
+            "type": "integer",
+            "title": "Latency Us"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request_id",
+          "decision",
+          "lane",
+          "score",
+          "reasons",
+          "policy_version",
+          "latency_us"
+        ],
+        "title": "VerifyResponse"
+      },
+      "VpnTolerance": {
+        "type": "string",
+        "enum": [
+          "allow",
+          "authenticated_only",
+          "block"
+        ],
+        "title": "VpnTolerance"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "verification",
+      "description": "Hot path, called by airlines for every award search."
+    },
+    {
+      "name": "airlines",
+      "description": "Airline onboarding and risk policy."
+    },
+    {
+      "name": "tools",
+      "description": "FFP monitoring tool registration, keys and analytics."
+    },
+    {
+      "name": "inventory",
+      "description": "Redemption (award) seat inventory per flight, date and award class."
+    },
+    {
+      "name": "feedback",
+      "description": "Ground-truth labels from airlines."
+    }
+  ]
+}

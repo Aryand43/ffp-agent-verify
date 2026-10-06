@@ -1,0 +1,50 @@
+# Verification API: stateless, CPU-bound, scale horizontally. Place it in the same region
+# (ideally the same cluster / VPC) as the airline's search API: the network hop dominates latency.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ffpv-verify
+spec:
+  replicas: 4
+  selector: {matchLabels: {app: ffpv-verify}}
+  template:
+    metadata:
+      labels: {app: ffpv-verify}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000", prometheus.io/path: /metrics}
+    spec:
+      containers:
+        - name: verify
+          image: ffp-agent-verify:latest
+          ports: [{containerPort: 8000}]
+          envFrom: [{secretRef: {name: ffpv-secrets}}]   # FFPV_DATABASE_URL, FFPV_REDIS_URL, FFPV_ADMIN_KEY
+          resources:
+            requests: {cpu: "1", memory: 256Mi}
+            limits: {memory: 512Mi}
+          readinessProbe: {httpGet: {path: /healthz, port: 8000}, periodSeconds: 2}
+          livenessProbe: {httpGet: {path: /healthz, port: 8000}, periodSeconds: 10, failureThreshold: 6}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: ffpv-verify}
+spec:
+  selector: {app: ffpv-verify}
+  ports: [{port: 80, targetPort: 8000}]
+---
+# Scale on CPU well below saturation: queueing, not verification, is what breaks the p99.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: {name: ffpv-verify}
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: ffpv-verify}
+  minReplicas: 4
+  maxReplicas: 60
+  metrics:
+    - type: Resource
+      resource: {name: cpu, target: {type: Utilization, averageUtilization: 50}}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: ffpv-verify}
+spec:
+  minAvailable: 75%
+  selector: {matchLabels: {app: ffpv-verify}}
